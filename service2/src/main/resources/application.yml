@@ -1,0 +1,50 @@
+management:
+  endpoint:
+    features:
+      enabled: true
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+resilience4j:
+  timelimiter:
+    instances:
+      service1:
+       timeout-duration: 1s
+       cancel-running-future: true
+  circuitbreaker:
+   configs:
+    default:
+     slidingWindowSize: 10
+     sliding-window-type: COUNT_BASED
+     minimumNumberOfCalls: 5
+     permittedNumberOfCallsInHalfOpenState: 3
+     automaticTransitionFromOpenToHalfOpenEnabled: true
+     waitDurationInOpenState: 2s
+     failureRateThreshold: 2
+     eventConsumerBufferSize: 10
+     recordExceptions:
+      - org.springframework.web.client.HttpServerErrorException
+      - java.io.IOException
+   instances:
+     service1:
+       eventConsumerBufferSize: 10
+       failureRateThreshold: 1
+       minimumNumberOfCalls: 10
+       permittedNumberOfCallsInHalfOpenState: 3
+       record-exceptions: 
+         - org.springframework.web.client.HttpServerErrorException
+         - java.io.IOException
+         - java.lang.IllegalStateException
+         - java.net.ConnectException
+         - org.springframework.web.client.ResourceAccessException
+       registerHealthIndicator: true
+       sliding-window-type: COUNT_BASED
+       slidingWindowSize: 10
+       waitDurationInOpenState: 2s
+server:
+  port: 8084
+spring:
+  application:
+    name: service2
